@@ -52,6 +52,7 @@ _log = fancylogger.getLogger('systemtools', fname=False)
 AMD = 'AMD'
 ARM = 'ARM'
 INTEL = 'Intel'
+IBM = 'IBM'
 
 LINUX = 'Linux'
 DARWIN = 'Darwin'
@@ -166,6 +167,14 @@ def get_cpu_vendor():
                 arch = res.groupdict().get('vendorid', UNKNOWN)
             if ARM in arch:
                 return ARM
+
+            regexp = re.compile(r"^model\s+:\s*(?P<vendorid>\w+)\S+\s*$", re.M)
+            res = regexp.search(txt)
+            if res:
+                arch = res.groupdict().get('vendorid', UNKNOWN)
+            if IBM in arch:
+                return IBM
+
         except IOError, err:
             raise SystemToolsException("An error occured while determining CPU vendor since: %s" % err)
 
@@ -200,6 +209,11 @@ def get_cpu_model():
                 res = regexp.search(txt)
                 if res is not None:
                     model = res.group('modelname').strip()
+                else:
+                    regexp = re.compile(r"^cpu\s+:\s*(?P<modelname>.+)\s*$", re.M)
+                    res = regexp.search(txt)
+                    if res is not None:
+                        model = res.group('modelname').strip()
         except IOError, err:
             raise SystemToolsException("An error occured when determining CPU model: %s" % err)
 
