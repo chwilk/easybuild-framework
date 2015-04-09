@@ -1,5 +1,5 @@
 # #
-# Copyright 2012-2014 Ghent University
+# Copyright 2012-2015 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -44,7 +44,7 @@ import easybuild.framework.easyconfig as easyconfig
 from easybuild.framework.easyblock import EasyBlock
 from easybuild.framework.easyconfig.easyconfig import EasyConfig
 from easybuild.framework.easyconfig.easyconfig import create_paths
-from easybuild.framework.easyconfig.easyconfig import fetch_parameter_from_easyconfig_file, get_easyblock_class
+from easybuild.framework.easyconfig.easyconfig import get_easyblock_class
 from easybuild.framework.easyconfig.parser import fetch_parameters_from_easyconfig
 from easybuild.framework.easyconfig.tweak import obtain_ec_for, tweak_one
 from easybuild.tools.build_log import EasyBuildError
@@ -874,11 +874,6 @@ class EasyConfigTest(EnhancedTestCase):
 
         self.assertEqual(fetch_parameters_from_easyconfig(read_file(toy_ec_file), ['description'])[0], "Toy C program.")
 
-        # also check deprecated function fetch_parameter_from_easyconfig_file
-        os.environ['EASYBUILD_DEPRECATED'] = '2.0'
-        init_config()
-        self.assertEqual(fetch_parameter_from_easyconfig_file(toy_ec_file, 'description'), "Toy C program.")
-
     def test_get_easyblock_class(self):
         """Test get_easyblock_class function."""
         from easybuild.easyblocks.generic.configuremake import ConfigureMake
@@ -1035,6 +1030,27 @@ class EasyConfigTest(EnhancedTestCase):
             ec[key] = 'foobar'
         self.assertErrorRegex(EasyBuildError, error_regex, set_ec_key, 'therenosucheasyconfigparameterlikethis')
 
+
+    def test_update(self):
+        """Test use of update() method for EasyConfig instances."""
+        toy_ebfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'easyconfigs', 'toy-0.0.eb')
+        ec = EasyConfig(toy_ebfile)
+
+        # for string values: append
+        ec.update('unpack_options', '--strip-components=1')
+        self.assertEqual(ec['unpack_options'].strip(), '--strip-components=1')
+
+        ec.update('description', "- just a test")
+        self.assertEqual(ec['description'].strip(), "Toy C program. - just a test")
+
+        # spaces in between multiple updates for stirng values
+        ec.update('configopts', 'CC="$CC"')
+        ec.update('configopts', 'CXX="$CXX"')
+        self.assertTrue(ec['configopts'].strip().endswith('CC="$CC"  CXX="$CXX"'))
+
+        # for list values: extend
+        ec.update('patches', ['foo.patch', 'bar.patch'])
+        self.assertEqual(ec['patches'], ['toy-0.0_typo.patch', 'foo.patch', 'bar.patch'])
 
 def suite():
     """ returns all the testcases in this module """

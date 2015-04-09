@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # #
-# Copyright 2012-2014 Ghent University
+# Copyright 2012-2015 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -54,6 +54,7 @@ fancylogger.setLogLevelError()
 
 # toolkit should be first to allow hacks to work
 import test.framework.asyncprocess as a
+import test.framework.build_log as bl
 import test.framework.config as c
 import test.framework.easyblock as b
 import test.framework.easyconfig as e
@@ -63,6 +64,7 @@ import test.framework.ebconfigobj as ebco
 import test.framework.easyconfigversion as ev
 import test.framework.filetools as f
 import test.framework.format_convert as f_c
+import test.framework.general as gen
 import test.framework.github as g
 import test.framework.license as l
 import test.framework.module_generator as mg
@@ -98,7 +100,7 @@ log = fancylogger.getLogger()
 
 # call suite() for each module and then run them all
 # note: make sure the options unit tests run first, to avoid running some of them with a readily initialized config
-tests = [o, r, ef, ev, ebco, ep, e, mg, m, mt, f, run, a, robot, b, v, g, tcv, tc, t, c, s, l, f_c, sc, tw, p]
+tests = [gen, bl, o, r, ef, ev, ebco, ep, e, mg, m, mt, f, run, a, robot, b, v, g, tcv, tc, t, c, s, l, f_c, sc, tw, p]
 
 SUITE = unittest.TestSuite([x.suite() for x in tests])
 
